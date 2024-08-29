@@ -18,6 +18,10 @@
         'docker-registry': {
             path: 'docker-registry',
             description: 'Self hosted docker registry (registry.rnzaou.me)'
+        },
+        'ci-image': {
+            path: 'ci-image',
+            description: 'Main CI docker image'
         }
     },
     # workspace global settings
