@@ -9,8 +9,8 @@ ARG RUST_VERSION="nightly"
 ARG DOCKER_VERSION="27.2.0"
 ARG BUILDX_VERSION="0.16.2"
 ARG CARGO_HOME="/root/.cargo"
-ARG BLAZE_VERSION="0.2.12"
-ARG BINARIES="target/x86_64-unknown-linux-musl/release/"
+ARG BLAZE_VERSION="0.2.13"
+ARG BINARIES="target/x86_64-unknown-linux-musl/release"
 
 RUN apk update && \
     apk add alpine-sdk \
@@ -33,7 +33,8 @@ RUN apk update && \
     --target x86_64-apple-darwin \
     --target aarch64-apple-darwin && \
     source "$HOME/.cargo/env" && \
-    cargo +${RUST_VERSION} install cross --git https://github.com/rnza0u/cross.git && \
+    cargo +${RUST_VERSION} install cross --git https://github.com/cross-rs/cross.git && \
+    cargo +${RUST_VERSION} install cargo-bump && \
     curl --output /tmp/docker.tgz https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz && \
     tar -C /tmp -xzf /tmp/docker.tgz docker/docker && \
     rm /tmp/docker.tgz && \
@@ -41,7 +42,7 @@ RUN apk update && \
     mkdir -p "$HOME/.docker/cli-plugins" && \
     curl --output "$HOME/.docker/cli-plugins/docker-buildx" --location https://github.com/docker/buildx/releases/download/v${BUILDX_VERSION}/buildx-v${BUILDX_VERSION}.linux-amd64 && \
     chmod +x "$HOME/.docker/cli-plugins/docker-buildx" && \
-    cargo "+${RUST_VERSION}" install -Z bindeps "blaze-cli@${BLAZE_VERSION}"
+    cargo +${RUST_VERSION} install -Z bindeps "blaze-cli@${BLAZE_VERSION}"
 
 ENV PATH="$PATH:$CARGO_HOME/bin/"
 ENV CROSS_CONTAINER_IN_CONTAINER="true"

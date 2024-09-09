@@ -72,7 +72,7 @@
                 }
             ]
         },
-        dependencies: ['registry-authenticate']
+        dependencies: ['registry-authenticate', 'build']
     },
     'registry-authenticate': {
         executor: {

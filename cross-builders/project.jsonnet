@@ -130,10 +130,7 @@ local architectures = [
                 commands: [
                     {
                         program: 'docker',
-                        arguments: [
-                            'push',
-                            'registry.rnzaou.me/' + name + '-cross'
-                        ]
+                        arguments: ['push', 'registry.rnzaou.me/' + name + '-cross']
                     }
                 ]
             },

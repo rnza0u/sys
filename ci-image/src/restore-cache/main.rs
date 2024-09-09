@@ -29,9 +29,9 @@ fn main() -> Result<()> {
     };
 
     println!("restoring cache from {}...", archive_path.display());
-
     archive.unpack("/")?;
 
+    println!("releasing cache lockfile...");
     lockfile.unlock()?;
 
     Ok(())

@@ -1,12 +1,11 @@
 use std::{
-    collections::HashSet,
+    collections::{HashSet, VecDeque},
     fs::File,
     path::{Path, PathBuf},
 };
 
 use anyhow::{anyhow, bail, Context};
 use fs4::{fs_std::FileExt, lock_contended_error};
-use serde::Deserialize;
 
 pub type Result<T> = std::result::Result<T, anyhow::Error>;
 
@@ -70,47 +69,40 @@ pub fn get_lockfile(storage_path: &Path, key: &str) -> Result<File> {
     Ok(lockfile)
 }
 
-pub fn get_cached_folders(root: &Path, extra_dirs: HashSet<PathBuf>) -> Result<HashSet<PathBuf>> {
-    let mut dirs = vec![root.to_owned()];
-    let mut paths = extra_dirs
-        .into_iter()
-        .map(|path| {
-            if path.is_absolute() {
-                path
-            } else {
-                root.join(path)
-            }
-        })
-        .collect::<HashSet<_>>();
+pub fn get_cached_dirs(root: &Path) -> Result<HashSet<PathBuf>> {
+    let mut dirs = VecDeque::from([root.to_owned()]);
+    let mut paths = HashSet::new();
 
-    while !dirs.is_empty() {
+    loop {
+        let current_dir = match dirs.pop_front(){
+            Some(dir) => dir,
+            None => break
+        };
 
-        let mut next_dirs = Vec::<PathBuf>::new();
+        let cached_folders = match File::open(current_dir.join(".cache.json")) {
+            Ok(cache_file) => serde_json::from_reader::<_, HashSet<PathBuf>>(cache_file)?,
+            Err(err) if err.kind() == std::io::ErrorKind::NotFound => HashSet::default(),
+            Err(err) => bail!(err),
+        };
 
-        for dir in dirs {
-            let folders_to_cache = match File::open(dir.join(".cache.json")) {
-                Ok(cache_file) => serde_json::from_reader::<_, HashSet<PathBuf>>(cache_file)?,
-                Err(err) if err.kind() == std::io::ErrorKind::NotFound => HashSet::default(),
-                Err(err) => bail!(err),
-            };
+        let cached_folders = cached_folders.into_iter()
+            .map(|path| current_dir.join(path))
+            .collect::<HashSet<_>>();
 
-            paths.extend(folders_to_cache);
+        paths.extend(cached_folders);
 
-            let entries = std::fs::read_dir(&dir)?
-                .map(|res| Ok(res?))
-                .collect::<Result<Vec<_>>>()?;
+        let entries = std::fs::read_dir(&current_dir)?
+            .map(|res| Ok(res?))
+            .collect::<Result<Vec<_>>>()?;
 
-            for entry in entries {
-                if entry.file_type()?.is_dir(){
-                    let absolute = root.join(entry.path());
-                    if !paths.contains(&absolute){
-                        next_dirs.push(root.join(entry.path()));
-                    }
+        for entry in entries {
+            if entry.file_type()?.is_dir(){
+                let subdir = entry.path();
+                if !paths.contains(&subdir){
+                    dirs.push_back(subdir);
                 }
             }
         }
-
-        dirs = next_dirs
     }
 
     Ok(paths)
