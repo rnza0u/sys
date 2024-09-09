@@ -9,7 +9,11 @@
                         arguments: [
                             'compose',
                             'up',
-                            '-d'
+                            '--detach',
+                            '--remove-orphans',
+                            '--pull',
+                            'always',
+                            '--force-recreate'
                         ]
                     }
                 ],

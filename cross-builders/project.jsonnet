@@ -2,7 +2,6 @@ local sdkBuilderRepository = 'registry.rnzaou.me/osx-sdk-builder';
 
 local osxSdkFile = 'MacOSX{{ environment.MACOS_SDK_VERSION }}.sdk.tar.bz2';
 
-local docker = import 'docker.libsonnet';
 local architectures = [
     'aarch64-apple-darwin',
     'x86_64-apple-darwin'
@@ -10,6 +9,13 @@ local architectures = [
 
 {
     targets: {
+        'docker-authenticate': {
+            executor: {
+                url: 'https://github.com/rnza0u/blaze-executors.git',
+                path: 'docker-authenticate',
+                format: 'Git'
+            }
+        },
         'build-osx-sdk-builder': {
             executor: 'std:commands', 
             cache: {
@@ -118,9 +124,21 @@ local architectures = [
             }
         }
     } + {
-        ['push-' + name]: docker.push(name + '-cross', 'registry.rnzaou.me') + {
+        ['push-' + name]: {
+            executor: 'std:commands',
+            options: {
+                commands: [
+                    {
+                        program: 'docker',
+                        arguments: [
+                            'push',
+                            'registry.rnzaou.me/' + name + '-cross'
+                        ]
+                    }
+                ]
+            },
             dependencies: [
-                'docker-registry:authenticate',
+                'docker-authenticate',
                 'build-image-' + name
             ]
         } for name in architectures

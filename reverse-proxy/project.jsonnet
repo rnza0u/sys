@@ -1,18 +1,54 @@
-local docker = import 'docker.libsonnet';
+local image = 'registry.rnzaou.me/reverse-proxy';
 
 {
     targets: {
-        build: docker.build(
-            'reverse-proxy', 
-            'registry.rnzaou.me', 
-            [
-                { pattern: 'conf.d/*', exclude: ['project.jsonnet'] },
-                'nginx.conf'
-            ]
-        ),
-        push: docker.push('reverse-proxy') + {
+        'docker-authenticate': {
+            executor: {
+                url: 'https://github.com/rnza0u/blaze-executors.git',
+                path: 'docker-authenticate',
+                format: 'Git'
+            }
+        },
+        build: {
+            executor: 'std:commands',
+            options: {
+                commands: [
+                    {
+                        program: 'docker',
+                        arguments: [
+                            'build',
+                            '-t',
+                            image,
+                            '.'
+                        ]
+                    }
+                ]
+            },
+            cache: {
+                invalidateWhen: {
+                    inputChanges: [
+                        'Dockerfile',
+                        'nginx.conf',
+                        'conf.d/**'
+                    ]
+                }
+            }
+        },
+        push: {
+            executor: 'std:commands',
+            options: {
+                commands: [
+                    {
+                        program: 'docker',
+                        arguments: [
+                            'push',
+                            image
+                        ]
+                    }
+                ]
+            },
             dependencies: [
-                'docker-registry:authenticate',
+                'docker-authenticate',
                 'build'
             ]
         },
@@ -34,6 +70,24 @@ local docker = import 'docker.libsonnet';
                 ]
             }
         },
-        deploy: docker.composeUp()
+        deploy: {
+            executor: 'std:commands',
+            options: {
+                commands: [
+                    {
+                        program: 'docker',
+                        arguments: [
+                            'compose',
+                            'up',
+                            '--detach',
+                            '--pull',
+                            'always',
+                            '--force-recreate',
+                            '--remove-orphans'
+                        ]
+                    }
+                ]
+            }
+        }
     }
 }
