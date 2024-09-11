@@ -8,6 +8,7 @@ ARG RUSTUP_VERSION="1.25"
 ARG RUST_VERSION="nightly"
 ARG DOCKER_VERSION="27.2.0"
 ARG BUILDX_VERSION="0.16.2"
+ARG COMPOSE_VERSION="2.29.2"
 ARG CARGO_HOME="/root/.cargo"
 ARG BLAZE_VERSION="0.2.13"
 ARG BINARIES="target/x86_64-unknown-linux-musl/release"
@@ -42,6 +43,8 @@ RUN apk update && \
     mkdir -p "$HOME/.docker/cli-plugins" && \
     curl --output "$HOME/.docker/cli-plugins/docker-buildx" --location https://github.com/docker/buildx/releases/download/v${BUILDX_VERSION}/buildx-v${BUILDX_VERSION}.linux-amd64 && \
     chmod +x "$HOME/.docker/cli-plugins/docker-buildx" && \
+    curl -SL https://github.com/docker/compose/releases/download/v${COMPOSE_VERSION}/docker-compose-linux-x86_64 -o "$HOME/.docker/cli-plugins/docker-compose" && \
+    chmod +x "$HOME/.docker/cli-plugins/docker-compose" && \
     cargo +${RUST_VERSION} install -Z bindeps "blaze-cli@${BLAZE_VERSION}"
 
 ENV PATH="$PATH:$CARGO_HOME/bin/"
