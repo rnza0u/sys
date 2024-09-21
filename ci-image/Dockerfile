@@ -10,7 +10,7 @@ ARG DOCKER_VERSION="27.2.1"
 ARG BUILDX_VERSION="0.17.1"
 ARG COMPOSE_VERSION="2.29.4"
 ARG CARGO_HOME="/root/.cargo"
-ARG BLAZE_VERSION="0.2.15"
+ARG BLAZE_VERSION="0.2.16"
 ARG BINARIES="target/x86_64-unknown-linux-musl/release"
 
 RUN apk update && \
