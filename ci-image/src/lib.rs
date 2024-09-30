@@ -1,6 +1,6 @@
 use std::{
     collections::{HashSet, VecDeque},
-    fs::File,
+    fs::{File, OpenOptions},
     path::{Path, PathBuf},
 };
 
@@ -57,7 +57,11 @@ pub fn get_archive_path(storage_path: &Path, key: &str) -> PathBuf {
 
 pub fn get_lockfile(storage_path: &Path, key: &str) -> Result<File> {
     let lockfile_path = storage_path.join(format!("{key}.lock"));
-    let lockfile = File::create(lockfile_path)?;
+    let lockfile = OpenOptions::new()
+        .read(true)
+        .write(true)
+        .create(true)
+        .open(lockfile_path)?;
 
     if let Err(err) = lockfile.try_lock_exclusive() {
         if err.kind() != lock_contended_error().kind() {
