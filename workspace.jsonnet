@@ -33,7 +33,7 @@
          # workspace log level if not overriden with the CLI 
         logLevel: 'Warn',
         # parallelism level to use when executing tasks (for e.g when using the `run` or `spawn` commands) if not overidden with the CLI.
-        parallelism: 'None',
+        parallelism: 'Infinite',
         # parallelism level to use when resolving executors
         resolutionParallelism: 'None'
     }

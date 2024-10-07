@@ -7,6 +7,9 @@ local image = 'registry.rnzaou.me/reverse-proxy';
                 url: 'https://github.com/rnza0u/blaze-executors.git',
                 path: 'docker-authenticate',
                 format: 'Git'
+            },
+            options: {
+                registry: 'registry.rnzaou.me'
             }
         },
         build: {
