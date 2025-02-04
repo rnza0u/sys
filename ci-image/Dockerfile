@@ -1,14 +1,15 @@
 # syntax=docker/dockerfile:1.4
 
-FROM alpine:3.20
+FROM alpine:3.21
 
-ARG NODE_VERSION="20"
+ARG DENO_VERSION="2"
+ARG NODE_VERSION="22"
 ARG NPM_VERSION="10"
 ARG RUSTUP_VERSION="1.25"
 ARG RUST_VERSION="nightly"
-ARG DOCKER_VERSION="27.2.1"
-ARG BUILDX_VERSION="0.17.1"
-ARG COMPOSE_VERSION="2.29.4"
+ARG DOCKER_VERSION="27.4.1"
+ARG BUILDX_VERSION="0.19.3"
+ARG COMPOSE_VERSION="2.32.1"
 ARG CARGO_HOME="/root/.cargo"
 ARG BLAZE_VERSION="0.2.16"
 ARG BINARIES="target/x86_64-unknown-linux-musl/release"
@@ -45,9 +46,10 @@ RUN apk update && \
     chmod +x "$HOME/.docker/cli-plugins/docker-buildx" && \
     curl -SL https://github.com/docker/compose/releases/download/v${COMPOSE_VERSION}/docker-compose-linux-x86_64 -o "$HOME/.docker/cli-plugins/docker-compose" && \
     chmod +x "$HOME/.docker/cli-plugins/docker-compose" && \
-    cargo +${RUST_VERSION} install -Z bindeps "blaze-cli@${BLAZE_VERSION}"
+    cargo +${RUST_VERSION} install -Z bindeps "blaze-cli@${BLAZE_VERSION}" && \
+    apk add deno~=${DENO_VERSION}
 
-ENV PATH="$PATH:$CARGO_HOME/bin/"
+ENV PATH="$PATH:$CARGO_HOME/bin/:/root/.deno/bin/"
 ENV CROSS_CONTAINER_IN_CONTAINER="true"
 
 COPY --chmod=500 --chown=0:0 ${BINARIES}/create-cache /usr/bin/create-cache
