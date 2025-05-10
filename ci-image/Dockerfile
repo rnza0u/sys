@@ -5,11 +5,12 @@ FROM alpine:3.21
 ARG DENO_VERSION="2"
 ARG NODE_VERSION="22"
 ARG NPM_VERSION="10"
+ARG PNPM_VERSION="10"
 ARG RUSTUP_VERSION="1.25"
 ARG RUST_VERSION="nightly"
-ARG DOCKER_VERSION="27.4.1"
-ARG BUILDX_VERSION="0.19.3"
-ARG COMPOSE_VERSION="2.32.1"
+ARG DOCKER_VERSION="28.1.1"
+ARG BUILDX_VERSION="0.23.0"
+ARG COMPOSE_VERSION="2.35.1"
 ARG CARGO_HOME="/root/.cargo"
 ARG BLAZE_VERSION="0.2.16"
 ARG BINARIES="target/x86_64-unknown-linux-musl/release"
@@ -27,6 +28,7 @@ RUN apk update && \
     rustup=~${RUSTUP_VERSION} \
     nodejs=~${NODE_VERSION} \
     npm=~${NPM_VERSION} && \
+    pnpm=~${PNPM_VERSION} && \
     rustup-init -y && \
     "$CARGO_HOME/bin/rustup" toolchain install ${RUST_VERSION} \
     --target x86_64-unknown-linux-gnu \
